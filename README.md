@@ -6,6 +6,8 @@
 
 **[点击进入 PixelBloom](https://lutingxie8-ship-it.github.io/pixel-bloom/)**
 
+![PixelBloom 游戏界面](docs/images/pixelbloom-gameplay.png)
+
 无需安装或注册，使用现代桌面浏览器即可开始。游戏进度保存在当前浏览器中，重要作品可以通过游戏内的导出功能备份。
 
 ## 游戏特色

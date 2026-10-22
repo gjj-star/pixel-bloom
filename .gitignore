@@ -3,4 +3,5 @@ aicraft-pixel-engine-main/
 .DS_Store
 Thumbs.db
 *.log
+.codex-screenshot-profile*/
 
