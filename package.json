@@ -1,0 +1,12 @@
+{
+  "name": "sandspiel-clone-v1",
+  "private": true,
+  "version": "0.14.0",
+  "description": "Sandspiel-inspired falling-sand cellular automaton",
+  "scripts": {
+    "test": "node tests/smoke-test.cjs"
+  },
+  "dependencies": {
+    "aicraft-pixel-engine": "^0.3.0"
+  }
+}

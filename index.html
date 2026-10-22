@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="从零复刻 Sandspiel 的元胞自动机教学项目" />
+  <title>微观自然实验室 · V0.15</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <p class="eyebrow">FALLING SAND LAB</p>
+        <h1>微观自然实验室</h1>
+        <p>自由造景，播种生长，观察一个小世界。</p>
+      </div>
+      <div class="header-actions">
+        <button id="save" type="button" class="primary-action">▣ 保存作品</button>
+        <button id="load" type="button">▤ 我的存档</button>
+        <button id="tutorial-open" type="button">❔ 新手引导</button>
+      </div>
+    </header>
+
+    <details class="world-setup">
+      <summary>场景与世界 <span>更换预设 · 清空 · 重置</span></summary>
+      <div class="setup-controls">
+        <label>预设场景 <select id="scene-preset"><option value="lab">材料实验室</option><option value="empty">空白世界</option><option value="pond">池塘湿地</option><option value="garden">花园苗圃</option><option value="orchard">果园</option></select></label>
+        <button id="start-scene" type="button">创建此场景</button>
+        <div class="world-danger-actions">
+          <button id="clear" type="button">◇ 清空画布</button>
+          <button id="reset" type="button">↺ 重置场景</button>
+        </div>
+      </div>
+      <p id="mode-description"></p>
+      <p id="scene-description"></p>
+    </details>
+    <section id="tutorial-panel" class="tutorial-panel" aria-labelledby="tutorial-title" hidden>
+      <div class="tutorial-heading"><h2 id="tutorial-title">欢迎来到自由沙盒</h2><button id="tutorial-skip" type="button">跳过引导</button></div>
+      <p id="tutorial-step-label"></p>
+      <p id="tutorial-description"></p>
+      <p id="tutorial-feedback" role="status" aria-live="polite"></p>
+      <div class="tutorial-actions">
+        <button id="tutorial-back" type="button">上一步</button>
+        <button id="tutorial-tool" type="button" hidden></button>
+        <button id="tutorial-next" type="button">开始引导</button>
+      </div>
+      <p class="tutorial-note">直接在当前画布练习，不清空、不覆盖作品。每一步都可略过，也可随时退出。</p>
+    </section>
+    <div class="workspace">
+      <aside class="toolbar" aria-label="材料面板">
+        <div class="panel-heading"><h2>材料</h2><span>选择后在画布绘制</span></div>
+        <div class="tools" id="palette" aria-label="材料选择"></div>
+      </aside>
+      <div class="workbench">
+      <section class="simulation-controls" aria-label="画布操作">
+      <div class="actions">
+        <label><span>笔刷</span><input id="brush" type="range" min="1" max="9" value="4" /></label>
+        <label><span>速度</span>
+          <select id="speed" aria-label="模拟速度">
+            <option value="0.5">0.5×</option>
+            <option value="1" selected>1×</option>
+            <option value="2">2×</option>
+            <option value="4">4×</option>
+          </select>
+        </label>
+        <button id="spray" type="button" aria-pressed="false">✦ 喷洒</button>
+        <button id="harvest" type="button" aria-pressed="false" title="普通模式靠近熟果可直接点击采摘；此按钮切换批量采果，按 C 切换，范围跟随笔刷大小">🧺 批量采果</button>
+        <button id="place-chick" type="button" aria-pressed="false">🐤 小鸡</button>
+        <button id="feed-chick" type="button" aria-pressed="false">🍎 喂果</button>
+        <button id="undo" type="button" disabled>↶ 撤销</button>
+        <button id="pause" type="button">⏸ 暂停</button>
+      </div>
+    </section>
+
+    <section class="storage-bar" aria-label="自动存档">
+      <span id="autosave-status" role="status">正在检查上次世界…</span>
+      <span id="resume-actions" hidden><button id="resume-world" type="button">继续上次世界</button><button id="fresh-world" type="button">从当前世界开始</button></span>
+    </section>
+    <div class="animal-bar"><span id="animal-status" role="status">🍎 可喂果子 0 · 🐤 小鸡 0/10 · 🥚 地上 0/8 · 已收蛋 0 · 已喂 0 颗</span><span id="interaction-hint" role="status">靠近熟果／鸡蛋／小鸡，可直接点击互动</span></div>
+    <div class="canvas-shell">
+      <div class="canvas-stage">
+        <canvas id="world" width="360" height="220" aria-label="可绘制沙、水、石头、花草种子、小树种子、霸王花种子、蘑菇孢子、仙人掌种子、柳树种子和红树林种子的模拟画布"></canvas>
+        <canvas id="effects" width="720" height="440" aria-hidden="true"></canvas>
+      </div>
+      <div class="status">
+        <span id="selected-label">当前：沙子</span><span id="message" role="status"> · 标准笔刷</span>
+      </div>
+    </div>
+    <details class="world-diagnostics">
+      <summary>世界统计与性能</summary>
+      <div class="diagnostic-values">
+        <span id="stats">材料统计准备中</span>
+        <span id="harvest-stats">🧺 已收集：0 · 树上采摘：0 · 落果拾取：0</span>
+        <span id="performance">FPS：-- · 更新：-- ms · 活动区：--</span>
+      </div>
+    </details>
+      </div>
+    </div>
+
+    <details class="lesson">
+      <summary>操作说明与快捷键</summary>
+      <p>空格：暂停／继续 · Z：撤销 · C：采果 · R：喷洒 · 1～9、0、E：材料快捷键</p>
+      <p>
+      <strong>种植与小鸡：</strong>普通绘制模式下，靠近熟果变抓手，点击即可采摘；靠近小鸡变互动指针，有果子且它没吃饱时点击喂一颗，否则摸摸它。进食或摸摸过程中请稍等，悬停不会消耗果子，同一次拖动只互动一次。熟果与小鸡重叠时优先采果。橡皮擦和专用工具优先，不触发便捷互动。也可使用「🧺 批量采果」（C）、「🐤 小鸡」放置或摸摸、「🍎 喂果」专门喂食。绘制、采摘、放置和喂食均可撤销；清空保留库存，重置清零。
+      </p>
+    </details>
+  </main>
+  <dialog id="world-library" aria-labelledby="world-library-title">
+    <div class="library-heading"><h2 id="world-library-title">我的世界与存档</h2><button id="library-close" type="button" aria-label="关闭存档管理">关闭</button></div>
+    <p>管理期间模拟暂停。存档保存在当前浏览器；导出文件可备份或转移到其他设备。</p>
+    <div class="library-actions">
+      <label>作品名称 <input id="world-name" maxlength="40" placeholder="我的花园" /></label>
+      <button id="library-save" type="button">另存为新作品</button>
+      <button id="library-export" type="button">导出当前世界</button>
+      <button id="library-import" type="button">导入世界文件</button>
+      <input id="world-file" type="file" accept=".json,application/json" hidden />
+    </div>
+    <p id="library-status" role="status" aria-live="polite"></p>
+    <div id="world-list" class="world-list"></div>
+  </dialog>
+  <dialog id="drainage-popup" aria-labelledby="drainage-popup-title" aria-describedby="drainage-popup-text">
+    <h2 id="drainage-popup-title">💧 根部积水，请及时排水</h2>
+    <p id="drainage-popup-text"></p>
+    <p class="drainage-note">提示不会暂停模拟。同一轮受涝只提醒一次；完全恢复后再次积水才会重新提醒。</p>
+    <div class="drainage-actions">
+      <button id="drainage-eraser" type="button">选择橡皮擦去排水</button>
+      <button id="drainage-dismiss" type="button">知道了</button>
+    </div>
+  </dialog>
+  <script src="aicraft-pixel-engine-adapter.js" defer></script>
+  <script src="app.js" defer></script>
+  <script src="world-storage.js" defer></script>
+  <script src="animals.js" defer></script>
+  <script src="tutorial.js" defer></script>
+</body>
+</html>
